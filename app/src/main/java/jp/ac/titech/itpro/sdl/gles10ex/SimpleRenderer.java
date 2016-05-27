@@ -20,6 +20,9 @@ public class SimpleRenderer implements GLSurfaceView.Renderer {
     }
 
     private float rx = 0, ry = 0, rz = 0;
+    private float prevX = 0, prevY = 0;
+    private final float TOUCH_SCALE_FACTOR_X = 240.0f;
+    private final float TOUCH_SCALE_FACTOR_Y = 180.0f;
 
     private ArrayList<Obj> objs;
 
@@ -65,6 +68,30 @@ public class SimpleRenderer implements GLSurfaceView.Renderer {
             gl.glScalef(1, 1, 1);
             obj.draw(gl);
         }
+    }
+
+    public void handleDragStart(float tx, float ty) {
+        prevX = tx;
+        prevY = ty;
+    }
+
+    public void handleDrag(float tx, float ty) {
+        rx += (tx - prevX) * TOUCH_SCALE_FACTOR_X;
+        if (rx > 360) {
+            rx -= 360;
+        } else if (rx < 0) {
+            rx += 360;
+        }
+
+        ry += (ty - prevY) * TOUCH_SCALE_FACTOR_Y;
+        if (ry > 360) {
+            ry -= 360;
+        } else if (ry < 0) {
+            ry += 360;
+        }
+
+        prevX = tx;
+        prevY = ty;
     }
 
     public void setRotationX(float th) {

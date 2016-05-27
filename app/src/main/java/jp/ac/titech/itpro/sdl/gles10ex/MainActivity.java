@@ -4,6 +4,8 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.SeekBar;
 
 
@@ -23,15 +25,43 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
         rotationBarX = (SeekBar) findViewById(R.id.rotation_bar_x);
         rotationBarY = (SeekBar) findViewById(R.id.rotation_bar_y);
-        rotationBarZ = (SeekBar) findViewById(R.id.rotation_bar_z);
+        // rotationBarZ = (SeekBar) findViewById(R.id.rotation_bar_z);
         rotationBarX.setOnSeekBarChangeListener(this);
         rotationBarY.setOnSeekBarChangeListener(this);
-        rotationBarZ.setOnSeekBarChangeListener(this);
+        // rotationBarZ.setOnSeekBarChangeListener(this);
 
         renderer = new SimpleRenderer();
         renderer.addObj(new Cube(0.5f, 0, 0.2f, -3));
         renderer.addObj(new Pyramid(0.5f, 0, 0, 0));
         glView.setRenderer(renderer);
+
+        glView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, final MotionEvent motionEvent) {
+                if (motionEvent != null) {
+                    final float normalizedX = motionEvent.getX() / (float) view.getWidth();
+                    final float normalizedY = motionEvent.getY() / (float) view.getHeight();
+
+                    if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                        glView.queueEvent(new Runnable() {
+                            @Override
+                            public void run() {
+                                renderer.handleDrag(normalizedY, normalizedX);
+                            }
+                        });
+                    } else if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                        glView.queueEvent(new Runnable() {
+                            @Override
+                            public void run() {
+                                renderer.handleDragStart(normalizedY, normalizedX);
+                            }
+                        });
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -54,8 +84,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             renderer.setRotationX(progress);
         else if (seekBar == rotationBarY)
             renderer.setRotationY(progress);
-        else if (seekBar == rotationBarZ)
-            renderer.setRotationZ(progress);
+        // else if (seekBar == rotationBarZ)
+        //     renderer.setRotationZ(progress);
     }
 
     @Override
